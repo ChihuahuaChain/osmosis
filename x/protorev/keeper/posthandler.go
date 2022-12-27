@@ -67,6 +67,8 @@ func (protoRevDec ProtoRevDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simu
 	if tradeErr == nil {
 		write()
 		ctx.EventManager().EmitEvents(cacheCtx.EventManager().Events())
+	} else {
+		ctx.Logger().Error("ProtoRevTrade failed with error", tradeErr)
 	}
 
 	return next(ctx, tx, simulate)
