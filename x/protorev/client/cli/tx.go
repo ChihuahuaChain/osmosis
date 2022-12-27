@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/gov/client/cli"
@@ -12,19 +13,28 @@ import (
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
+	"github.com/osmosis-labs/osmosis/v13/osmoutils/osmocli"
 	"github.com/osmosis-labs/osmosis/v13/x/protorev/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
+
+func NewCmdTx() *cobra.Command {
+	txCmd := osmocli.TxIndexCmd(types.ModuleName)
+	txCmd.AddCommand(
+		CmdSetProtoRevAdminAccountProposal(),
+		CmdSetProtoRevEnabledProposal(),
+	)
+	return txCmd
+}
 
 // CmdSetProtoRevAdminAccountProposal implements the command to submit a SetProtoRevAdminAccountProposal
 func CmdSetProtoRevAdminAccountProposal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "set-protorev-admin-account-proposal [sdk.AccAddress]",
 		Args:    cobra.ExactArgs(1),
-		Short:   "submit a set protorev admin account proposal",
-		Long:    "submit a set protorev admin proposal followed by an sdk.AccAddress of the new admin account.",
-		Example: fmt.Sprintf(`$ %s tx gov submit-proposal set-protorev-admin-account osmo123... --from mykey`, version.AppName),
+		Short:   "submit a set protorev admin account proposal to set the admin account for x/protorev",
+		Example: fmt.Sprintf(`$ %s tx protorev set-protorev-admin-account osmo123... --from mykey`, version.AppName),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -71,6 +81,9 @@ func CmdSetProtoRevAdminAccountProposal() *cobra.Command {
 	cmd.Flags().String(cli.FlagTitle, "", "title of proposal")
 	cmd.Flags().String(cli.FlagDescription, "", "description of proposal")
 	cmd.Flags().String(cli.FlagDeposit, "", "deposit of proposal")
+	flags.AddTxFlagsToCmd(cmd)
+	_ = cmd.MarkFlagRequired(cli.FlagTitle)
+	_ = cmd.MarkFlagRequired(cli.FlagDescription)
 
 	return cmd
 }
@@ -80,9 +93,8 @@ func CmdSetProtoRevEnabledProposal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "set-protorev-enabled-proposal [boolean]",
 		Args:    cobra.ExactArgs(1),
-		Short:   "Submit a SetProtoRevEnabled proposal",
-		Long:    "Submit a SetProtoRevEnabled proposal followed by a boolean of whether or not the protocol should be enabled.",
-		Example: fmt.Sprintf(`$ %s tx gov submit-proposal set-protorev-enabled true --from mykey`, version.AppName),
+		Short:   "submit a set protorev enabled proposal to enable or disable the protocol",
+		Example: fmt.Sprintf(`$ %s tx protorev set-protorev-enabled true --from mykey`, version.AppName),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -134,6 +146,9 @@ func CmdSetProtoRevEnabledProposal() *cobra.Command {
 	cmd.Flags().String(cli.FlagTitle, "", "title of proposal")
 	cmd.Flags().String(cli.FlagDescription, "", "description of proposal")
 	cmd.Flags().String(cli.FlagDeposit, "", "deposit of proposal")
+	flags.AddTxFlagsToCmd(cmd)
+	_ = cmd.MarkFlagRequired(cli.FlagTitle)
+	_ = cmd.MarkFlagRequired(cli.FlagDescription)
 
 	return cmd
 }
